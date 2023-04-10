@@ -11,8 +11,8 @@ def get_market_list():
     response = requests.get(url, headers=headers)
     return response.json()
 
-def get_candle_data(market_code, count=200, interval="day"):
-    url = "https://api.upbit.com/v1/candles/days"
+def get_candle_data(market_code, count=200, interval="days"):
+    url = f"https://api.upbit.com/v1/candles/{interval}"
     querystring = {"market": market_code, "count": count}
     headers = {"accept": "application/json"}
     response = requests.get(url, headers=headers, params=querystring)
