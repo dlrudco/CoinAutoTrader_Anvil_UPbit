@@ -31,7 +31,7 @@ def get_my_balance():
   }
 
   res = requests.get(server_url + '/v1/accounts', params=None, headers=headers)
-  return res.json()
+  return {**res.json(), 'headers':{**res.headers}}
 
 if __name__ == "__main__":
   print(credentials().access_key)

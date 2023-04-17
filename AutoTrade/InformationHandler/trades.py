@@ -16,7 +16,7 @@ def check_chance(market):
     headers = payload.encode_payload(params)
 
     res = requests.get(creds.server_url + '/v1/orders/chance', params=params, headers=headers)
-    return res.json()
+    return {**res.json(), 'headers':{**res.headers}}
 
 
 def check_single_order_status(uuid=None, identifier=None):
@@ -27,7 +27,7 @@ def check_single_order_status(uuid=None, identifier=None):
     headers = payload.encode_payload(params)
 
     res = requests.get(creds.server_url + '/v1/order', params=params, headers=headers)
-    return res.json()
+    return {**res.json(), 'headers':{**res.headers}}
 
 def check_all_orders_by_state(market, state : str = None, states: List[str] = None, page: int = 1, limit: int = 100):
     assert state or states, 'state or states must be provided'
@@ -38,7 +38,13 @@ def check_all_orders_by_state(market, state : str = None, states: List[str] = No
     headers = payload.encode_payload(params)
 
     res = requests.get(creds.server_url + '/v1/orders', params=params, headers=headers)
-    return res.json()
+    res = {**res.json(), 'headers':{**res.headers}}
+    if isinstance(res, dict):
+        return [res] if res['market'] == market else []
+    elif isinstance(res, list):
+        return [r for r in res if r['market'] == market]
+    else:
+        return []
 
     
 def check_all_orders_by_ids(market, uuids: List[str] = None, identifiers : List[str] = None, page: int = 1, limit: int = 100):
@@ -50,7 +56,7 @@ def check_all_orders_by_ids(market, uuids: List[str] = None, identifiers : List[
     headers = payload.encode_payload(params)
 
     res = requests.get(creds.server_url + '/v1/orders', params=params, headers=headers)
-    return res.json()
+    return {**res.json(), 'headers':{**res.headers}}
 
 if __name__ == "__main__":
     breakpoint()

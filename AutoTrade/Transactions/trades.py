@@ -3,8 +3,9 @@ if __name__ == "__main__":
     import sys
     sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from InformationHandler import *
-from utils import payload
+from utils import payload, header
 
+import time
 import requests
 
 creds = credentials()
@@ -57,7 +58,7 @@ def post_order(market:str, side:str, ord_type:str, price:float, volume:float):
     headers = payload.encode_payload(params)
 
     res = requests.post(creds.server_url + '/v1/orders', json=params, headers=headers)
-    return res.json()
+    return {**res.json(), 'headers':{**res.headers}}
 
 def limit_sell_coin(market, price, volume):
     return post_order(market, 'ask', 'limit', price, volume)
@@ -80,7 +81,21 @@ def cancel_order(uuid:str=None, identifier:str=None):
     headers = payload.encode_payload(params)
 
     res = requests.delete(creds.server_url + '/v1/order', params=params, headers=headers)
-    return res.json()
+    return {**res.json(), 'headers':{**res.headers}}
+
+def cancel_all_waiting(market):
+    order_list = check_all_orders_by_state(market, 'wait')
+    flag = True
+    for o in order_list:
+        if flag:
+            stat = cancel_order(uuid=o['uuid'])
+            print(o['uuid'], stat['state'])
+        if header.get_remaining_calls(stat['headers'])['lim_second'] ==0 or header.get_remaining_calls(stat['headers'])['lim_minute'] ==0:
+            time.sleep(0.1)
+            flag = False
+        else:
+            flag = True
+            
 
 if __name__ == "__main__":
     breakpoint()
