@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # export get_market_list, get_candle_data, plot_candle_chart for 'all'
-__all__ = ['get_market_list', 'get_candle_data', 'plot_candle_chart']
+__all__ = ['get_market_list', 'get_candle_data', 'plot_candle_chart', 'get_current_price']
 
 def get_market_list():
     url = "https://api.upbit.com/v1/market/all?isDetails=true"
@@ -48,7 +48,12 @@ def plot_candle_chart(data, market_code):
     # Show the chart
     plt.show()
     
-    
+def get_current_price(market_code):
+    url = f"https://api.upbit.com/v1/ticker"
+    querystring = {"markets": market_code}
+    headers = {"accept": "application/json"}
+    response = requests.get(url, headers=headers, params=querystring)
+    return response.json()
     
     
 

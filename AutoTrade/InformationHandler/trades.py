@@ -1,11 +1,7 @@
 from .accounts import *
+from utils import payload 
 
-import jwt
-import hashlib
-import os
 import requests
-import uuid as uuidlib
-from urllib.parse import urlencode, unquote
 from typing import List
 
 creds = credentials()
@@ -17,24 +13,7 @@ def check_chance(market):
     'market': market,
     }
     
-    query_string = unquote(urlencode(params, doseq=True)).encode("utf-8")
-
-    m = hashlib.sha512()
-    m.update(query_string)
-    query_hash = m.hexdigest()
-
-    payload = {
-        'access_key': creds.access_key,
-        'nonce': str(uuidlib.uuid4()),
-        'query_hash': query_hash,
-        'query_hash_alg': 'SHA512',
-    }
-
-    jwt_token = jwt.encode(payload, creds.secret_key)
-    authorization = 'Bearer {}'.format(jwt_token)
-    headers = {
-    'Authorization': authorization,
-    }
+    headers = payload.encode_payload(params)
 
     res = requests.get(creds.server_url + '/v1/orders/chance', params=params, headers=headers)
     return res.json()
@@ -45,24 +24,7 @@ def check_single_order_status(uuid=None, identifier=None):
     assert not (uuid and identifier), 'uuid and identifier cannot be provided at the same time'
     
     params = {'uuid': uuid} if uuid else {'identifier': identifier}
-    query_string = unquote(urlencode(params, doseq=True)).encode("utf-8")
-
-    m = hashlib.sha512()
-    m.update(query_string)
-    query_hash = m.hexdigest()
-
-    payload = {
-        'access_key': creds.access_key,
-        'nonce': str(uuidlib.uuid4()),
-        'query_hash': query_hash,
-        'query_hash_alg': 'SHA512',
-    }
-
-    jwt_token = jwt.encode(payload, creds.secret_key)
-    authorization = 'Bearer {}'.format(jwt_token)
-    headers = {
-    'Authorization': authorization,
-    }
+    headers = payload.encode_payload(params)
 
     res = requests.get(creds.server_url + '/v1/order', params=params, headers=headers)
     return res.json()
@@ -73,24 +35,7 @@ def check_all_orders_by_state(market, state : str = None, states: List[str] = No
     
     params = {'states[]': states} if states else {'state': state}
     
-    query_string = unquote(urlencode(params, doseq=True)).encode("utf-8")
-
-    m = hashlib.sha512()
-    m.update(query_string)
-    query_hash = m.hexdigest()
-
-    payload = {
-        'access_key': creds.access_key,
-        'nonce': str(uuidlib.uuid4()),
-        'query_hash': query_hash,
-        'query_hash_alg': 'SHA512',
-    }
-
-    jwt_token = jwt.encode(payload, creds.secret_key)
-    authorization = 'Bearer {}'.format(jwt_token)
-    headers = {
-    'Authorization': authorization,
-    }
+    headers = payload.encode_payload(params)
 
     res = requests.get(creds.server_url + '/v1/orders', params=params, headers=headers)
     return res.json()
@@ -102,24 +47,7 @@ def check_all_orders_by_ids(market, uuids: List[str] = None, identifiers : List[
     
     params = {'uuids[]': uuids} if uuids else {'identifiers[]': identifiers}
     
-    query_string = unquote(urlencode(params, doseq=True)).encode("utf-8")
-
-    m = hashlib.sha512()
-    m.update(query_string)
-    query_hash = m.hexdigest()
-
-    payload = {
-        'access_key': creds.access_key,
-        'nonce': str(uuidlib.uuid4()),
-        'query_hash': query_hash,
-        'query_hash_alg': 'SHA512',
-    }
-
-    jwt_token = jwt.encode(payload, creds.secret_key)
-    authorization = 'Bearer {}'.format(jwt_token)
-    headers = {
-    'Authorization': authorization,
-    }
+    headers = payload.encode_payload(params)
 
     res = requests.get(creds.server_url + '/v1/orders', params=params, headers=headers)
     return res.json()

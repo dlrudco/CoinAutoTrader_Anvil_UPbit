@@ -1,13 +1,11 @@
 import os
-import sys
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if __name__ == "__main__":
+    import sys
+    sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from InformationHandler import *
+from utils import payload
 
-import jwt
-import hashlib
 import requests
-import uuid as uuidlib
-from urllib.parse import urlencode, unquote
 
 creds = credentials()
 
@@ -52,27 +50,11 @@ def post_order(market:str, side:str, ord_type:str, price:float, volume:float):
     'volume': volume
     }
     if params['price'] is None:
-        del params['price']
-        
+        del params['price']      
+    if params['volume'] is None:
+        del params['volume']
     
-    query_string = unquote(urlencode(params, doseq=True)).encode("utf-8")
-
-    m = hashlib.sha512()
-    m.update(query_string)
-    query_hash = m.hexdigest()
-
-    payload = {
-        'access_key': creds.access_key,
-        'nonce': str(uuidlib.uuid4()),
-        'query_hash': query_hash,
-        'query_hash_alg': 'SHA512',
-    }
-
-    jwt_token = jwt.encode(payload, creds.secret_key)
-    authorization = 'Bearer {}'.format(jwt_token)
-    headers = {
-    'Authorization': authorization,
-    }
+    headers = payload.encode_payload(params)
 
     res = requests.post(creds.server_url + '/v1/orders', json=params, headers=headers)
     return res.json()
@@ -86,8 +68,8 @@ def limit_buy_coin(market, price, volume):
 def market_sell_coin(market, volume):
     return post_order(market, 'ask', 'market', None, volume)
 
-def market_buy_coin(market, volume):
-    return post_order(market, 'bid', 'price', None, volume)
+def market_buy_coin(market, price):
+    return post_order(market, 'bid', 'price', price, None)
 
 def cancel_order(uuid:str=None, identifier:str=None):
     assert uuid or identifier, 'uuid or identifier must be provided'
@@ -95,24 +77,7 @@ def cancel_order(uuid:str=None, identifier:str=None):
 
 
     params = {'uuid': uuid} if uuid else {'identifier': identifier}
-    query_string = unquote(urlencode(params, doseq=True)).encode("utf-8")
-
-    m = hashlib.sha512()
-    m.update(query_string)
-    query_hash = m.hexdigest()
-
-    payload = {
-        'access_key': creds.access_key,
-        'nonce': str(uuidlib.uuid4()),
-        'query_hash': query_hash,
-        'query_hash_alg': 'SHA512',
-    }
-
-    jwt_token = jwt.encode(payload, creds.secret_key)
-    authorization = 'Bearer {}'.format(jwt_token)
-    headers = {
-    'Authorization': authorization,
-    }
+    headers = payload.encode_payload(params)
 
     res = requests.delete(creds.server_url + '/v1/order', params=params, headers=headers)
     return res.json()
