@@ -12,17 +12,17 @@ creds = credentials()
 __all__ = ['limit_sell_coin', 'limit_buy_coin', 'market_sell_coin', 'market_buy_coin', 'cancel_order']
 
 def post_order(market:str, side:str, ord_type:str, price:float, volume:float):
-    """_summary_
+    """주어진 파라미터에 상응하는 거래를 요청한다
 
-    :param market: _description_
+    :param market: 거래를 요청할 마켓코드
     :type market: str
-    :param side: _description_
+    :param side: 매수('bid')/매도('ask') 구분
     :type side: str
-    :param ord_type: _description_
+    :param ord_type: 시장가 주문('market/price')/지정가 주문('limit') 구분
     :type ord_type: str
-    :param price: _description_
+    :param price: 거래 가격
     :type price: float
-    :param volume: _description_
+    :param volume: 거래 물량
     :type volume: float
     :return: 
         uuid	주문의 고유 아이디	String
